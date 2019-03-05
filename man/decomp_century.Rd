@@ -4,10 +4,59 @@
 \alias{decomp_century}
 \title{Decomposition - CENTURY}
 \usage{
-decomp_century()
+decomp_century(forc_st, psi, forc_npp, forc_roots, forc_exoenzyme, clay,
+  DOC, ACTIVE, SLOW, PASSIVE, f_DOC_ATM, f_ACTIVE_ATM, f_PASSIVE_ATM,
+  f_SLOW_ATM, f_ACTIVE_DOC, f_ACTIVE_SLOW, f_SLOW_PASSIVE,
+  f_ACTIVE_PASSIVE, f_PASSIVE_ACTIVE, f_DOC_Leaching, timestep)
+}
+\arguments{
+\item{forc_st}{forc_st}
+
+\item{psi}{psi}
+
+\item{forc_npp}{forc_npp}
+
+\item{forc_roots}{forc_roots}
+
+\item{forc_exoenzyme}{forc_exoenzyme}
+
+\item{clay}{clay}
+
+\item{DOC}{DOC}
+
+\item{ACTIVE}{ACTIVE}
+
+\item{SLOW}{SLOW}
+
+\item{PASSIVE}{PASSIVE}
+
+\item{f_DOC_ATM}{f_DOC_ATM}
+
+\item{f_ACTIVE_ATM}{f_ACTIVE_ATM}
+
+\item{f_PASSIVE_ATM}{f_PASSIVE_ATM}
+
+\item{f_SLOW_ATM}{f_SLOW_ATM}
+
+\item{f_ACTIVE_DOC}{f_ACTIVE_DOC}
+
+\item{f_ACTIVE_SLOW}{f_ACTIVE_SLOW}
+
+\item{f_SLOW_PASSIVE}{f_SLOW_PASSIVE}
+
+\item{f_ACTIVE_PASSIVE}{f_ACTIVE_PASSIVE}
+
+\item{f_PASSIVE_ACTIVE}{f_PASSIVE_ACTIVE}
+
+\item{f_DOC_Leaching}{f_DOC_Leaching}
+
+\item{timestep}{Timestep (days)}
 }
 \value{
-stuff
+A list containing forc_exoenzyme, clay, DOC, ACTIVE,
+SLOW, PASSIVE, f_DOC_ATM, f_ACTIVE_ATM, f_PASSIVE_ATM,
+f_SLOW_ATM, f_ACTIVE_DOC, f_ACTIVE_SLOW, f_SLOW_PASSIVE,
+f_ACTIVE_PASSIVE, f_PASSIVE_ACTIVE, and f_DOC_Leaching.
 }
 \description{
 Decomposition - CENTURY
