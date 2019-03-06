@@ -6,7 +6,7 @@
 #' @param forc_npp forc_npp
 #' @param forc_roots forc_roots
 #' @param forc_exoenzyme forc_exoenzyme
-#' @param clay Clay (percent)
+#' @param clay Clay (fraction)
 #' @param LMWC LMWC
 #' @param POM POM
 #' @param MB MB
@@ -192,11 +192,13 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   #   685 	!relwc <- seq(0,1,length.out = 100)
   # 686 	!wfunc <- 1/(1 + 30 * exp(-9*relwc))
   # 687 	w_scalar = 1.0 / (1.0 + 30. * EXP(real(-9.0 * forc_sw)))
+  w_scalar <- 1.0 / (1.0 + 30 * exp(-9.0 * forc_sw))
   # 688
   # 689 	! LMWC -> out of sysem LWMMWC leaching
   # 690 	if (LMWC > 0._r8) then
   # 691         f_LM_leaching = LMWC * k_leaching * t_scalar !* w_scalar ! Xiaofeng removed water impact, after review at GBC June,2017
   # 692 	end if
+  # LMWC -> out of sysem LWMMWC leaching
   if(LMWC > 0) {
     f_LM_leaching <- LMWC * globals$k_leaching * t_scalar #* w_scalar ! Xiaofeng removed water impact, after review at GBC June,2017
   }
@@ -210,14 +212,17 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 700
   # 701 	! LMWC -> MINERAL: This desorption function is from Mayes 2012, SSAJ
   # 702 	klmc_min = (10.0 ** (-0.186 * pH - 0.216)) / 24.0
+  # LMWC -> MINERAL: This desorption function is from Mayes 2012, SSAJ
   klmc_min <- (10.0 ^ (-0.186 * pH - 0.216)) / 24.0
   # 703 !	Qmax = 10.0 ** (0.4833 * log(clay * 100.0) + 2.3282) * 1.35 ! 1.35 is bulk density to convert Q from mg/kg to mg/m3
   # 704 	Qmax = 10.0 ** (0.297 * log(clay * 100.0) + 2.355 + 0.50) !* 1.25  ! 1.35 is bulk density to convert Q from mg/kg to g/m2
   Qmax <- 10.0 ^ (0.297 * log(clay * 100.0) + 2.355 + 0.50) #* 1.25  # 1.35 is bulk density to convert Q from mg/kg to g/m2
   # 705 !	write(*,*)"Qmax: ", Qmax
   # 706 	temp = (klmc_min * Qmax * LMWC ) / (2. + klmc_min * LMWC) - MINERAL
+  temp <- (klmc_min * Qmax * LMWC ) / (2 + klmc_min * LMWC) - MINERAL
   # 707 !	if(temp > 0)then
   # 708 	f_LM_MI_sor = (temp / Qmax + 0.0015) * LMWC / 50. * t_scalar * w_scalar !* t_scalar * w_scalar !* (LMWC / 200) * (LMWC / 200)
+  f_LM_MI_sor <- (temp / Qmax + 0.0015) * LMWC / 50 * t_scalar * w_scalar #* t_scalar * w_scalar !* (LMWC / 200) * (LMWC / 200)
   # 709 !	else
   #   710 !	f_LM_MI_sor = 0.
   # 711 !	end if
@@ -228,6 +233,11 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 716 	else
   #   717 	f_LM_MI_sor = LMWC * 0.9
   # 718 	end if
+  if (f_LM_MI_sor < (LMWC * 0.9)) {
+    f_LM_MI_sor <- f_LM_MI_sor
+  } else {
+    f_LM_MI_sor <- LMWC * 0.9
+  }
   # 719
   # 720 	!~ if(f_LM_MI_sor < 0) then
   # 721 	!~ f_LM_MI_sor = 0.
@@ -244,15 +254,27 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 732 	end if
   # 733 	f_LM_MB_uptake = f_LM_MB_uptake - temp2
   # 734 	end if
+  # LMWC -> MB
+  if(LMWC > 0) {
+    f_LM_MB_uptake <- LMWC * klmc * t_scalar * w_scalar * MB / (MB + kes) * LMWC / (20 + LMWC)
+    temp2 <- f_LM_MB_uptake * (1 - (CUEref + CUET * (forc_st - Taeref)))
+    temp2 <- max(temp2, 0)
+    f_LM_MB_uptake <- f_LM_MB_uptake - temp2
+  }
   # 735
   # 736 	! POM -> LMWC
   # 737 	if (POM > 0._r8) then
   # 738         f_PO_LM_dep = Vpom_lmc * POM / (POM + kpom) * t_scalar * w_scalar !* (1. - MB / (MB + k_POMes))
   # 739 	end if
+  # POM -> LMWC
+  if (POM > 0) {
+    f_PO_LM_dep <- Vpom_lmc * POM / (POM + kpom) * t_scalar * w_scalar #* (1. - MB / (MB + k_POMes))
+  }
   # 740
   # 741 	if(f_PO_LM_dep > (0.9 * POM)) then
   # 742 	f_PO_LM_dep = 0.9 * POM
   # 743 	end if
+  f_PO_LM_dep <- max(f_PO_LM_dep,  0.9 * POM)
   # 744
   # 745 !	print *, f_PO_LM_dep, Vpom_lmc, POM, kpom, MB, k_POMes
   # 746
@@ -267,27 +289,43 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 755 	else
   #   756 	f_MB_MI_sor = 0.
   # 757 	end if
+  if (MB > 0 & MINERAL < Qmax) {
+    f_MB_MI_sor <- MB * kmic * 0.15 * t_scalar_mb * w_scalar  #* (MB / 200) * (MB / 200)
+  } else {
+    f_MB_MI_sor <- 0
+  }
   # 758
   # 759 	if(f_MB_MI_sor > 0.9 * MB) then
   # 760 	f_MB_MI_sor = 0.9 * MB
   # 761 	end if
+  f_MB_MI_sor <- max(f_MB_MI_sor, 0.9 * MB)
   # 762 	if(f_MB_MI_sor < 0.) then
   # 763 	f_MB_MI_sor = 0.
   # 764 	end if
+  f_MB_MI_sor <- max(f_MB_MI_sor, 0)
   # 765
   # 766 	! MB -> ATM
   # 767 	if (MB > 0._r8) then
   # 768         f_MB_atm = temp2 + MB * kmic * t_scalar_mb * w_scalar
   # 769 	end if
+  # MB -> ATM
+  if(MB > 0) {
+    f_MB_atm <- temp2 + MB * kmic * t_scalar_mb * w_scalar
+  }
   # 770
   # 771 	! POM -> SOILAGG
   # 772 	if (POM > 0._r8) then
   # 773         f_PO_SO_agg = Vpom_agg * POM / (kpom_agg + POM) * (1. - SOILAGG / AGGmax) * t_scalar * w_scalar
   # 774 	end if
+  # POM -> SOILAGG
+  if (POM > 0) {
+    f_PO_SO_agg <- Vpom_agg * POM / (kpom_agg + POM) * (1 - SOILAGG / AGGmax) * t_scalar * w_scalar
+  }
   # 775
   # 776 	if(f_PO_SO_agg > 0.9 * POM) then
   # 777 	f_PO_SO_agg = 0.9 * POM
   # 778 	end if
+  f_PO_SO_agg <- max(f_PO_SO_agg, 0.9 * POM)
   # 779
   # 780 !	print *, "POM > soilAGG: ",  f_PO_SO_agg, Vpom_agg, POM, kpom_agg, SOILAGG, AGGmax
   # 781
@@ -295,6 +333,10 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 783 	if (MINERAL > 0._r8) then
   # 784         f_MI_SO_agg = Vmin_agg * MINERAL / (kmin_agg + MINERAL) * (1. - SOILAGG / AGGmax) !* t_scalar * w_scalar
   # 785 	end if
+  # MINERAL -> SOILAGG
+  if (MINERAL > 0) {
+    f_MI_SO_agg <- Vmin_agg * MINERAL / (kmin_agg + MINERAL) * (1 - SOILAGG / AGGmax) #* t_scalar * w_scalar
+  }
   # 786
   # 787 	if(f_MI_SO_agg>0.9 * MINERAL) then
   # 788 	f_MI_SO_agg = 0.9 * MINERAL
@@ -309,6 +351,7 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 794 	f_SO_PO_break = f_SO_break * 1.5 / 3.
   # 795 	f_SO_MI_break = f_SO_break * 1.5 / 3.
   # 796 	end if
+  # SOILAGG -> MINERAL
   if (SOILAGG > 0) {
     f_SO_break <- SOILAGG * kagg * t_scalar * w_scalar
     f_SO_PO_break <- f_SO_break * 1.5 / 3
@@ -316,29 +359,46 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   }
   # 797
   # 798 !	print *, "before update:", forc_npp, LMWC,POM,MB,MINERAL,SOILAGG,f_PO_LM_dep,f_MI_LM_des,f_LM_leaching,f_LM_MI_sor,f_LM_MB_uptake,&
-  #   799 !	f_SO_PO_break,f_PO_LM_dep,f_PO_SO_agg
+  # 799 !	f_SO_PO_break,f_PO_LM_dep,f_PO_SO_agg
   # 800
   # 801 	if((f_PO_LM_dep + f_PO_SO_agg) > POM) then
   # 802 	temp3 = POM / (f_PO_LM_dep + f_PO_SO_agg)
   # 803 	f_PO_LM_dep = f_PO_LM_dep * temp3
   # 804 	f_PO_SO_agg = f_PO_SO_agg * temp3
   # 805 	end if
+  if((f_PO_LM_dep + f_PO_SO_agg) > POM) {
+    temp3 <- POM / (f_PO_LM_dep + f_PO_SO_agg)
+    f_PO_LM_dep <- f_PO_LM_dep * temp3
+    f_PO_SO_agg <- f_PO_SO_agg * temp3
+  }
   # 806
   # 807 	LMWC = LMWC + (f_PO_LM_dep + f_MI_LM_des - f_LM_leaching - f_LM_MI_sor - f_LM_MB_uptake - temp2) + forc_npp / 3.
+  LMWC <- LMWC + (f_PO_LM_dep + f_MI_LM_des - f_LM_leaching - f_LM_MI_sor - f_LM_MB_uptake - temp2) + forc_npp / 3
   # 808
   # 809 	POM = POM + (f_SO_PO_break - f_PO_LM_dep - f_PO_SO_agg) + forc_npp * 2. / 3.
+  POM <- POM + (f_SO_PO_break - f_PO_LM_dep - f_PO_SO_agg) + forc_npp * 2. / 3
   # 810
   # 811 	MB = MB + (f_LM_MB_uptake - f_MB_MI_sor - f_MB_atm)
+  MB <- MB + (f_LM_MB_uptake - f_MB_MI_sor - f_MB_atm)
   # 812
   # 813 !	print *, "MB, LM_MB, MB_Mi, MB_ATM", MB, f_LM_MB_uptake, f_MB_MI_sor, f_MB_atm
   # 814
   # 815 	MINERAL = MINERAL + (f_LM_MI_sor + f_MB_MI_sor + f_SO_MI_break - f_MI_LM_des - f_MI_SO_agg)
+  MINERAL <- MINERAL + (f_LM_MI_sor + f_MB_MI_sor + f_SO_MI_break - f_MI_LM_des - f_MI_SO_agg)
   # 816
   # 817 	SOILAGG = SOILAGG + (f_PO_SO_agg + f_MI_SO_agg - f_SO_PO_break - f_SO_MI_break)
+  SOILAGG <- SOILAGG + (f_PO_SO_agg + f_MI_SO_agg - f_SO_PO_break - f_SO_MI_break)
   # 818
   # 819 !	print *, "after update:", LMWC,POM,MB,MINERAL,SOILAGG,f_PO_LM_dep,f_MI_LM_des,f_LM_leaching,f_LM_MI_sor,f_LM_MB_uptake,&
   #   820 !	f_SO_PO_break,f_PO_LM_dep,f_PO_SO_agg
   # 821
   # 822 end subroutine decomp
   # 823 	! decomposition subroutine end
+  list(LMWC = LMWC, POM = POM, MB = MB, MINERAL = MINERAL, SOILAGG = SOILAGG,
+       f_LM_leaching = f_LM_leaching, f_MI_LM_des = f_MI_LM_des,
+       f_LM_MI_sor = f_LM_MI_sor, f_LM_MB_uptake = f_LM_MB_uptake,
+       f_PO_LM_dep = f_PO_LM_dep, f_MB_MI_sor = f_MB_MI_sor,
+       f_PO_SO_agg = f_PO_SO_agg, f_MI_SO_agg = f_MI_SO_agg,
+       f_SO_PO_break = f_SO_PO_break, f_SO_MI_break = f_SO_MI_break,
+       f_MB_atm = f_MB_atm)
 }

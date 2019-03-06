@@ -20,7 +20,7 @@ decomp(forc_st, forc_sw, psi, forc_npp, forc_roots, forc_exoenzyme, clay,
 
 \item{forc_exoenzyme}{forc_exoenzyme}
 
-\item{clay}{Clay (percent)}
+\item{clay}{Clay (fraction)}
 
 \item{LMWC}{LMWC}
 
