@@ -1,13 +1,13 @@
-#' Soil hydrological properties
+#' Compute soil hydrological properties.
 #'
-#' @param sand Sand (percent)
-#' @param clay Clay (percent)
-#' @param silt Silt (percent)
+#' @param sand Sand (fraction)
+#' @param clay Clay (fraction)
+#' @param silt Silt (fraction)
 #' @param vwc Volumetric water content (m3/m3)
 #' @param vwcsat Volumetric water content at saturation (m3/m3)
 #' @param organic Organic matter content (kg/m3)
-#' @return A list containing psisat (soil water potential at saturation, MPa);
-#'  psi (soil water potential, MPa); and smp_l (soil matrix potential; mm).
+#' @return A list containing \code{psisat} (soil water potential at saturation, MPa);
+#'  \code{psi} (soil water potential, MPa); and \code{smp_l} (soil matrix potential; mm).
 #' @export
 soilpsi <- function(sand, clay, silt, vwc, vwcsat, organic) {
   # 825 !	hydrological properties start

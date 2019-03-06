@@ -2,16 +2,16 @@
 % Please edit documentation in R/soilpsi.R
 \name{soilpsi}
 \alias{soilpsi}
-\title{Soil hydrological properties}
+\title{Compute soil hydrological properties.}
 \usage{
 soilpsi(sand, clay, silt, vwc, vwcsat, organic)
 }
 \arguments{
-\item{sand}{Sand (percent)}
+\item{sand}{Sand (fraction)}
 
-\item{clay}{Clay (percent)}
+\item{clay}{Clay (fraction)}
 
-\item{silt}{Silt (percent)}
+\item{silt}{Silt (fraction)}
 
 \item{vwc}{Volumetric water content (m3/m3)}
 
@@ -20,9 +20,9 @@ soilpsi(sand, clay, silt, vwc, vwcsat, organic)
 \item{organic}{Organic matter content (kg/m3)}
 }
 \value{
-A list containing psisat (soil water potential at saturation, MPa);
- psi (soil water potential, MPa); and smp_l (soil matrix potential; mm).
+A list containing \code{psisat} (soil water potential at saturation, MPa);
+ \code{psi} (soil water potential, MPa); and \code{smp_l} (soil matrix potential; mm).
 }
 \description{
-Soil hydrological properties
+Compute soil hydrological properties.
 }
