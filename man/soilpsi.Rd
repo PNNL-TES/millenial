@@ -26,3 +26,6 @@ A list containing \code{psisat} (soil water potential at saturation, MPa);
 \description{
 Compute soil hydrological properties.
 }
+\examples{
+soilpsi(sand = 0.4, silt = 0.4, clay = 0.2, vwc = 0.4, vwcsat = 0.8, organic = 10)
+}

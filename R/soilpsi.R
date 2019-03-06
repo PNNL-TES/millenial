@@ -6,10 +6,17 @@
 #' @param vwc Volumetric water content (m3/m3)
 #' @param vwcsat Volumetric water content at saturation (m3/m3)
 #' @param organic Organic matter content (kg/m3)
+#' @importFrom assertthat assert_that
 #' @return A list containing \code{psisat} (soil water potential at saturation, MPa);
 #'  \code{psi} (soil water potential, MPa); and \code{smp_l} (soil matrix potential; mm).
 #' @export
+#' @examples
+#' soilpsi(sand = 0.4, silt = 0.4, clay = 0.2, vwc = 0.4, vwcsat = 0.8, organic = 10)
 soilpsi <- function(sand, clay, silt, vwc, vwcsat, organic) {
+  assert_that(sand >= 0 & sand <= 1)
+  assert_that(silt >= 0 & silt <= 1)
+  assert_that(clay >= 0 & clay <= 1)
+  assert_that(all.equal(sand + silt + clay, 1))
   # 825 !	hydrological properties start
   # 826 subroutine soilpsi(sand, clay, silt, vwc, vwcsat, organic, psisat, psi, smp_l)
   # 827 implicit none
@@ -46,7 +53,7 @@ soilpsi <- function(sand, clay, silt, vwc, vwcsat, organic) {
   # 854 	if(vwc > vwcsat) then
   # 855 	write(*,*) 'vwcsat is less than vwc'
   # 856 	end if
-  stopifnot(vwc <= vwcsat)
+  assert_that(vwc <= vwcsat)
   # 857
   # 858 	om_frac = min(organic / organic_max, 1._r8)
   om_frac <- min(organic / organic_max, 1)
