@@ -6,17 +6,20 @@
 #' @param vwc Volumetric water content (m3/m3)
 #' @param vwcsat Volumetric water content at saturation (m3/m3)
 #' @param organic Organic matter content (kg/m3)
+#' @param quiet Print diagnostics?
 #' @importFrom assertthat assert_that
 #' @return A list containing \code{psisat} (soil water potential at saturation, MPa);
 #'  \code{psi} (soil water potential, MPa); and \code{smp_l} (soil matrix potential; mm).
+#' @details Soil water potential at saturation (\code{psisat}) is
+#' computed from a long equation with no reference.
 #' @export
 #' @examples
 #' soilpsi(sand = 0.4, silt = 0.4, clay = 0.2, vwc = 0.4, vwcsat = 0.8, organic = 10)
-soilpsi <- function(sand, clay, silt, vwc, vwcsat, organic) {
-  assert_that(sand >= 0 & sand <= 1)
-  assert_that(silt >= 0 & silt <= 1)
-  assert_that(clay >= 0 & clay <= 1)
-  assert_that(all.equal(sand + silt + clay, 1))
+soilpsi <- function(sand, clay, silt, vwc, vwcsat, organic, quiet = FALSE) {
+  assert_that(sand >= 0)
+  assert_that(silt >= 0)
+  assert_that(clay >= 0)
+  assert_that(all.equal(sand + silt + clay, 1.0))
   # 825 !	hydrological properties start
   # 826 subroutine soilpsi(sand, clay, silt, vwc, vwcsat, organic, psisat, psi, smp_l)
   # 827 implicit none
@@ -48,11 +51,14 @@ soilpsi <- function(sand, clay, silt, vwc, vwcsat, organic) {
   om_sucsat <- 10.3    	# saturated suction for organic matter (Letts, 2000)
   smpmin <- -1    	    # restriction for min of soil potential line 750 of iniTimeConst.F90
   organic_max <- 130
+  assert_that(organic > 0)
+  assert_that(organic <= organic_max)
   om_b <- 2.7
   # 853 !	print * , vwc, vwcsat
   # 854 	if(vwc > vwcsat) then
   # 855 	write(*,*) 'vwcsat is less than vwc'
   # 856 	end if
+  assert_that(vwc >= 0)
   assert_that(vwc <= vwcsat)
   # 857
   # 858 	om_frac = min(organic / organic_max, 1._r8)
@@ -76,7 +82,7 @@ soilpsi <- function(sand, clay, silt, vwc, vwcsat, organic) {
   # 867 	psi = psisat * ((vwc/vwcsat)**bsw2)
   psi <- psisat * ((vwc / vwcsat) ^ bsw2)
   # 868 !	print *, "psi: ", psi,psisat, bsw2, smp_l, sucsat, bsw, om_frac,organic,om_b
-  cat("psi: ", psi, psisat, bsw2, smp_l, sucsat, bsw, om_frac, organic, om_b, "\n")
+  if(!quiet) cat("psi: ", psi, psisat, bsw2, smp_l, sucsat, bsw, om_frac, organic, om_b, "\n")
   # 869 end subroutine soilpsi
   # 870 !	hydrological properties end
   list(psisat = psisat, psi = psi, smp_l = smp_l)

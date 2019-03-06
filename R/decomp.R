@@ -18,7 +18,6 @@
 #' SOILAGG, f_LM_leaching, f_MI_LM_des, f_LM_MI_sor, f_LM_MB_uptake,
 #' f_PO_LM_dep, f_MB_MI_sor, f_PO_SO_agg, f_MI_SO_agg,
 #' f_SO_PO_break, f_SO_MI_break, and f_MB_atm.
-
 #' @export
 decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
                    forc_exoenzyme, clay, LMWC, POM, MB, MINERAL,

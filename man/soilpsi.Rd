@@ -4,7 +4,7 @@
 \alias{soilpsi}
 \title{Compute soil hydrological properties.}
 \usage{
-soilpsi(sand, clay, silt, vwc, vwcsat, organic)
+soilpsi(sand, clay, silt, vwc, vwcsat, organic, quiet = FALSE)
 }
 \arguments{
 \item{sand}{Sand (fraction)}
@@ -18,6 +18,8 @@ soilpsi(sand, clay, silt, vwc, vwcsat, organic)
 \item{vwcsat}{Volumetric water content at saturation (m3/m3)}
 
 \item{organic}{Organic matter content (kg/m3)}
+
+\item{quiet}{Print diagnostics?}
 }
 \value{
 A list containing \code{psisat} (soil water potential at saturation, MPa);
@@ -25,6 +27,10 @@ A list containing \code{psisat} (soil water potential at saturation, MPa);
 }
 \description{
 Compute soil hydrological properties.
+}
+\details{
+Soil water potential at saturation (\code{psisat}) is
+computed from a long equation with no reference.
 }
 \examples{
 soilpsi(sand = 0.4, silt = 0.4, clay = 0.2, vwc = 0.4, vwcsat = 0.8, organic = 10)
