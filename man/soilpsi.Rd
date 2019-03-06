@@ -20,7 +20,8 @@ soilpsi(sand, clay, silt, vwc, vwcsat, organic)
 \item{organic}{Organic matter content (kg/m3)}
 }
 \value{
-A list containing psisat, psi, smp_l (soil matrix potential; all mm).
+A list containing psisat (soil water potential at saturation, MPa);
+ psi (soil water potential, MPa); and smp_l (soil matrix potential; mm).
 }
 \description{
 Soil hydrological properties

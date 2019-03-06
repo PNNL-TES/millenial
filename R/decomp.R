@@ -1,12 +1,28 @@
 #' Decomposition
 #'
-#' @return stuff
+#' @param forc_st Soil temperature (Kelvin; -nlevsno+1:nlevgrnd)
+#' @param forc_sw Soil moisture (fraction)
+#' @param psi Soil water potential at saturation (MPa)
+#' @param forc_npp forc_npp
+#' @param forc_roots forc_roots
+#' @param forc_exoenzyme forc_exoenzyme
+#' @param clay Clay (percent)
+#' @param LMWC LMWC
+#' @param POM POM
+#' @param MB MB
+#' @param MINERAL MINERAL
+#' @param SOILAGG SOILAGG
+#' @param globals List of global variables
+#'
+#' @return A list containing LMWC, POM, MB, MINERAL,
+#' SOILAGG, f_LM_leaching, f_MI_LM_des, f_LM_MI_sor, f_LM_MB_uptake,
+#' f_PO_LM_dep, f_MB_MI_sor, f_PO_SO_agg, f_MI_SO_agg,
+#' f_SO_PO_break, f_SO_MI_break, and f_MB_atm.
+
 #' @export
 decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
                    forc_exoenzyme, clay, LMWC, POM, MB, MINERAL,
-                   SOILAGG, f_LM_leaching, f_MI_LM_des, f_LM_MI_sor,
-                   f_LM_MB_uptake,f_PO_LM_dep, f_MB_MI_sor,f_PO_SO_agg,
-                   f_MI_SO_agg, f_SO_PO_break, f_SO_MI_break, f_MB_atm) {
+                   SOILAGG, globals) {
   #   537 !	decomposition subroutine start
   #   538 subroutine decomp(forc_st, forc_sw, psi, forc_npp, forc_roots, &
   #                           539 		forc_exoenzyme, clay, LMWC, POM, MB, MINERAL, SOILAGG, f_LM_leaching, f_MI_LM_des,&
@@ -67,8 +83,8 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   #   594
   #   595 	! local pointers to implicit out scalars
   #   596 	!
-  #     597 	! !OTHER LOCAL VARIABLES:
-  #     598
+  #   597 	! !OTHER LOCAL VARIABLES:
+  #   598
   #   599 	real		:: temp, temp2, temp3	! temporary variables
   #   600 	real		:: psi_tem1, psi_tem2
   #   601 	real		:: k_sorption          		! temporar variable for k of sorption
@@ -85,7 +101,7 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   #   612 	real(r8)	:: w_scalar_reverse     	! soil temperature scalar for decomp
   #   613
   #   614 	!~ !-----------------------------------------------------------------------
-  #     615
+  #   615
   #   616 	common	/global/ &
   #     617 		k_leaching, &
   #     618 		Vm_l, &
@@ -115,16 +131,25 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   #   642 	temp = (forc_st - 15._r8) / 10._r8
   #   643 	t_scalar = t_scalar + 2. **(temp)
   #   644 	t_scalar_reverse = t_scalar_reverse + 0.5**(temp)
+  temp <- (forc_st - 15) / 10
+  t_scalar <- 2 ^ temp
+  t_scalar_reverse <- 0.5 ^ temp
   #   645
   #   646 	t_scalar_mb = 0._r8
   #   647 	temp = (forc_st - 15._r8) / 10._r8
   #   648 	t_scalar_mb = t_scalar_mb + 2.**(temp)
+  temp <- (forc_st - 15) / 10
+  t_scalar_mb <- 2 ^ temp
   #   649
   #   650 !	print *, "t_scalar", t_scalar, minpsi, maxpsi, psi
   #   651 	minpsi = -10.0_r8
   #   652 	w_scalar = 0._r8
   #   653 	maxpsi = -0.01_r8
   #   654 	pH = 7.0
+  minpsi <- -10
+  w_scalar <- 0
+  maxpsi <- -0.01
+  pH <- 7
   #   655 !~ !	print *, " here ", minpsi / psi, minpsi / maxpsi
   #   656 	!~ psi_tem1 = minpsi / psi
   #   657 	!~ psi_tem2 = minpsi / maxpsi
@@ -141,18 +166,27 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 668 !	xiaofeng replaced above codes with following
   # 669 	if (psi > minpsi) then
   # 670 	w_scalar = w_scalar + (psi-minpsi)*(psi-maxpsi)/((psi-minpsi)*(psi-maxpsi) - &
-  #                                                         671 		(psi-(maxpsi-(maxpsi-minpsi)/3.))*(psi-(maxpsi-(maxpsi-minpsi)/3.)))
+  # 671 		(psi-(maxpsi-(maxpsi-minpsi)/3.))*(psi-(maxpsi-(maxpsi-minpsi)/3.)))
   # 672 	end if
+  if (psi > minpsi) {
+    w_scalar = w_scalar + (psi - minpsi) * (psi - maxpsi) /
+      ((psi - minpsi) * (psi - maxpsi) - (psi - (maxpsi - (maxpsi - minpsi) / 3)) *
+         (psi- (maxpsi - (maxpsi - minpsi) / 3)))
+  }
   # 673 	w_scalar = w_scalar ** 0.5
+  w_scalar <- sqrt(w_scalar)
   # 674 !	print *, "w_scalar", w_scalar
   # 675
   # 676 	!#century temperature function
-  #   677 	!soilTemp <- seq(-20,40,length.out = 100)
+  # 677 	!soilTemp <- seq(-20,40,length.out = 100)
   # 678 	!teff <- c(15.4, 11.75, 29.7, 0.031)
   # 679 	!tfunc <- (teff[2] + (teff[3]/pi)* atan(pi*teff[4]*(soilTemp - teff[1]))) / (teff[2] + (teff[3]/pi)* atan(pi*teff[4]*(30 - teff[1])))
   # 680 	t_scalar = (11.75 + (29.7 / 3.1415926) * ATAN(real(3.1415926*0.031*(forc_st - 15.4)))) / &
   #   681 	(11.75 + (29.7 / 3.1415926) * ATAN(real(3.1415926 * 0.031 *(30.0 - 15.4))))
+  t_scalar <- (11.75 + (29.7 / pi) * atan(pi * 0.031 * (forc_st - 15.4))) /
+    (11.75 + (29.7 / pi) * atan(pi * 0.031 *(30.0 - 15.4)))
   # 682 	t_scalar_mb = t_scalar
+  t_scalar_mb <- t_scalar
   # 683
   # 684 	!#century water function
   #   685 	!relwc <- seq(0,1,length.out = 100)
@@ -163,6 +197,9 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 690 	if (LMWC > 0._r8) then
   # 691         f_LM_leaching = LMWC * k_leaching * t_scalar !* w_scalar ! Xiaofeng removed water impact, after review at GBC June,2017
   # 692 	end if
+  if(LMWC > 0) {
+    f_LM_leaching <- LMWC * globals$k_leaching * t_scalar #* w_scalar ! Xiaofeng removed water impact, after review at GBC June,2017
+  }
   # 693
   # 694 	!~ ! MINERAL -> LWMC  desorption Xu found this processes is not imporant as we treat below desorption function as double way, blocked it
   # 695 	!~ if (MINERAL > M_Lmin) then
@@ -173,8 +210,10 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 700
   # 701 	! LMWC -> MINERAL: This desorption function is from Mayes 2012, SSAJ
   # 702 	klmc_min = (10.0 ** (-0.186 * pH - 0.216)) / 24.0
+  klmc_min <- (10.0 ^ (-0.186 * pH - 0.216)) / 24.0
   # 703 !	Qmax = 10.0 ** (0.4833 * log(clay * 100.0) + 2.3282) * 1.35 ! 1.35 is bulk density to convert Q from mg/kg to mg/m3
   # 704 	Qmax = 10.0 ** (0.297 * log(clay * 100.0) + 2.355 + 0.50) !* 1.25  ! 1.35 is bulk density to convert Q from mg/kg to g/m2
+  Qmax <- 10.0 ^ (0.297 * log(clay * 100.0) + 2.355 + 0.50) #* 1.25  # 1.35 is bulk density to convert Q from mg/kg to g/m2
   # 705 !	write(*,*)"Qmax: ", Qmax
   # 706 	temp = (klmc_min * Qmax * LMWC ) / (2. + klmc_min * LMWC) - MINERAL
   # 707 !	if(temp > 0)then
@@ -260,6 +299,9 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 787 	if(f_MI_SO_agg>0.9 * MINERAL) then
   # 788 	f_MI_SO_agg = 0.9 * MINERAL
   # 789 	end if
+  if (f_MI_SO_agg > 0.9 * MINERAL) {
+    f_MI_SO_agg <- 0.9 * MINERAL
+  }
   # 790
   # 791 	! SOILAGG -> MINERAL
   # 792 	if (SOILAGG > 0._r8) then
@@ -267,6 +309,11 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 794 	f_SO_PO_break = f_SO_break * 1.5 / 3.
   # 795 	f_SO_MI_break = f_SO_break * 1.5 / 3.
   # 796 	end if
+  if (SOILAGG > 0) {
+    f_SO_break <- SOILAGG * kagg * t_scalar * w_scalar
+    f_SO_PO_break <- f_SO_break * 1.5 / 3
+    f_SO_MI_break <- f_SO_break * 1.5 / 3
+  }
   # 797
   # 798 !	print *, "before update:", forc_npp, LMWC,POM,MB,MINERAL,SOILAGG,f_PO_LM_dep,f_MI_LM_des,f_LM_leaching,f_LM_MI_sor,f_LM_MB_uptake,&
   #   799 !	f_SO_PO_break,f_PO_LM_dep,f_PO_SO_agg

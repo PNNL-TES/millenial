@@ -6,7 +6,8 @@
 #' @param vwc Volumetric water content (m3/m3)
 #' @param vwcsat Volumetric water content at saturation (m3/m3)
 #' @param organic Organic matter content (kg/m3)
-#' @return A list containing psisat, psi, smp_l (soil matrix potential; all mm).
+#' @return A list containing psisat (soil water potential at saturation, MPa);
+#'  psi (soil water potential, MPa); and smp_l (soil matrix potential; mm).
 #' @export
 soilpsi <- function(sand, clay, silt, vwc, vwcsat, organic) {
   # 825 !	hydrological properties start

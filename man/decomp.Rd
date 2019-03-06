@@ -5,12 +5,40 @@
 \title{Decomposition}
 \usage{
 decomp(forc_st, forc_sw, psi, forc_npp, forc_roots, forc_exoenzyme, clay,
-  LMWC, POM, MB, MINERAL, SOILAGG, f_LM_leaching, f_MI_LM_des, f_LM_MI_sor,
-  f_LM_MB_uptake, f_PO_LM_dep, f_MB_MI_sor, f_PO_SO_agg, f_MI_SO_agg,
-  f_SO_PO_break, f_SO_MI_break, f_MB_atm)
+  LMWC, POM, MB, MINERAL, SOILAGG, globals)
+}
+\arguments{
+\item{forc_st}{Soil temperature (Kelvin; -nlevsno+1:nlevgrnd)}
+
+\item{forc_sw}{Soil moisture (fraction)}
+
+\item{psi}{Soil water potential at saturation (MPa)}
+
+\item{forc_npp}{forc_npp}
+
+\item{forc_roots}{forc_roots}
+
+\item{forc_exoenzyme}{forc_exoenzyme}
+
+\item{clay}{Clay (percent)}
+
+\item{LMWC}{LMWC}
+
+\item{POM}{POM}
+
+\item{MB}{MB}
+
+\item{MINERAL}{MINERAL}
+
+\item{SOILAGG}{SOILAGG}
+
+\item{globals}{List of global variables}
 }
 \value{
-stuff
+A list containing LMWC, POM, MB, MINERAL,
+SOILAGG, f_LM_leaching, f_MI_LM_des, f_LM_MI_sor, f_LM_MB_uptake,
+f_PO_LM_dep, f_MB_MI_sor, f_PO_SO_agg, f_MI_SO_agg,
+f_SO_PO_break, f_SO_MI_break, and f_MB_atm.
 }
 \description{
 Decomposition
