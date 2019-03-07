@@ -7,11 +7,11 @@
 soilpsi(sand, clay, silt, vwc, vwcsat, organic, quiet = FALSE)
 }
 \arguments{
-\item{sand}{Sand (fraction)}
+\item{sand}{Sand (percent)}
 
-\item{clay}{Clay (fraction)}
+\item{clay}{Clay (percent)}
 
-\item{silt}{Silt (fraction)}
+\item{silt}{Silt (percent)}
 
 \item{vwc}{Volumetric water content (m3/m3)}
 
@@ -29,9 +29,13 @@ A list containing \code{psisat} (soil water potential at saturation, MPa);
 Compute soil hydrological properties.
 }
 \details{
-Soil water potential at saturation (\code{psisat}) is
-computed from a long equation with no reference.
+The calculations generally follow Clapp & Hornberger (1978),
+"Empirical equations for some soil hydraulic properties",
+\url{https://doi.org/10.1029/WR014i004p00601}. Peatland calculations are based on
+Letts et al. (2000), "Parametrization of peatland hydraulic properties
+for the Canadian land surface scheme",
+\url{https://doi.org/10.1080/07055900.2000.9649643}.
 }
 \examples{
-soilpsi(sand = 0.4, silt = 0.4, clay = 0.2, vwc = 0.4, vwcsat = 0.8, organic = 10)
+soilpsi(sand = 40, silt = 40, clay = 20, vwc = 0.4, vwcsat = 0.8, organic = 10)
 }
