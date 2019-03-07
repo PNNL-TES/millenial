@@ -1,8 +1,8 @@
 #' Compute soil hydrological properties.
 #'
-#' @param sand Sand (fraction)
-#' @param clay Clay (fraction)
-#' @param silt Silt (fraction)
+#' @param sand Sand (percentage)
+#' @param silt Silt (percentage)
+#' @param clay Clay (percentage)
 #' @param vwc Volumetric water content (m3/m3)
 #' @param vwcsat Volumetric water content at saturation (m3/m3)
 #' @param organic Organic matter content (kg/m3)
@@ -14,12 +14,12 @@
 #' computed from a long equation with no reference.
 #' @export
 #' @examples
-#' soilpsi(sand = 0.4, silt = 0.4, clay = 0.2, vwc = 0.4, vwcsat = 0.8, organic = 10)
+#' soilpsi(sand = 40, silt = 40, clay = 20, vwc = 0.4, vwcsat = 0.8, organic = 10)
 soilpsi <- function(sand, clay, silt, vwc, vwcsat, organic, quiet = FALSE) {
   assert_that(sand >= 0)
   assert_that(silt >= 0)
   assert_that(clay >= 0)
-  assert_that(all.equal(sand + silt + clay, 1.0))
+  assert_that(all.equal(sand + silt + clay, 100.0))
   # 825 !	hydrological properties start
   # 826 subroutine soilpsi(sand, clay, silt, vwc, vwcsat, organic, psisat, psi, smp_l)
   # 827 implicit none
@@ -49,11 +49,12 @@ soilpsi <- function(sand, clay, silt, vwc, vwcsat, organic, quiet = FALSE) {
   # 851 	organic_max = 130._r8
   # 852 	om_b = 2.7_r8
   om_sucsat <- 10.3    	# saturated suction for organic matter (Letts, 2000)
-  smpmin <- -1    	    # restriction for min of soil potential line 750 of iniTimeConst.F90
+  smpmin <- -1    	    # restriction for min of soil potential line 750 of iniTimeConst.F90 (CLM)
   organic_max <- 130
   assert_that(organic > 0)
   assert_that(organic <= organic_max)
-  om_b <- 2.7
+
+  om_b <- 2.7 # Clapp and Hornberger parameter for oragnic soil (Letts, 2000)
   # 853 !	print * , vwc, vwcsat
   # 854 	if(vwc > vwcsat) then
   # 855 	write(*,*) 'vwcsat is less than vwc'
@@ -63,10 +64,18 @@ soilpsi <- function(sand, clay, silt, vwc, vwcsat, organic, quiet = FALSE) {
   # 857
   # 858 	om_frac = min(organic / organic_max, 1._r8)
   om_frac <- min(organic / organic_max, 1)
-  # 859 	sucsat = 10. * ( 10.**(1.88-0.0131*sand) )
+
+  # The following calculations generally follow Clapp & Hornberger 1978,
+  # "Empirical equations for some soil hydraulic properties"
+  # https://doi.org/10.1029/WR014i004p00601
+
+  # Peatland calculation after Letts et al. 2000, "Parametrization of
+  # peatland hydraulic properties for the Canadian land surface scheme"
+  # https://doi.org/10.1080/07055900.2000.9649643
+
   sucsat <- 10 * (10 ^ (1.88 - 0.0131 * sand))
   # 860 	bsw = (1.-om_frac)*(2.91 + 0.159*clay) + om_frac*om_b
-  bsw <- (1 - om_frac) * (2.91 + 0.159 * clay) + om_frac * om_b
+  bsw <- (1 - om_frac) * (2.91 + 0.159 * clay) + om_frac * om_b  # Clapp and Hornberger "b"
   # 861 	sucsat = (1.-om_frac)*sucsat + om_sucsat*om_frac
   sucsat <- (1 - om_frac) * sucsat + om_sucsat * om_frac
   # 862 	s_node = min(1.0, max(vwc / vwcsat, 0.01))
