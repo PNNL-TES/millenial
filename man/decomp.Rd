@@ -8,7 +8,7 @@ decomp(forc_st, forc_sw, psi, forc_npp, forc_roots, forc_exoenzyme, clay,
   LMWC, POM, MB, MINERAL, SOILAGG, globals)
 }
 \arguments{
-\item{forc_st}{Soil temperature (Kelvin; -nlevsno+1:nlevgrnd)}
+\item{forc_st}{Soil temperature (K)}
 
 \item{forc_sw}{Soil moisture (fraction)}
 

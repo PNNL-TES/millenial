@@ -1,6 +1,6 @@
 #' Decomposition
 #'
-#' @param forc_st Soil temperature (Kelvin; -nlevsno+1:nlevgrnd)
+#' @param forc_st Soil temperature (K)
 #' @param forc_sw Soil moisture (fraction)
 #' @param psi Soil water potential at saturation (MPa)
 #' @param forc_npp forc_npp
