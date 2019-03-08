@@ -4,27 +4,20 @@
 \alias{decomp_century}
 \title{Decomposition - CENTURY}
 \usage{
-decomp_century(forc_st, psi, forc_exoenzyme, clay, DOC, ACTIVE, SLOW,
-  PASSIVE, f_DOC_ATM, timestep)
+decomp_century(forc_st, psi, DOC, ACTIVE, SLOW, PASSIVE, timestep)
 }
 \arguments{
 \item{forc_st}{Soil temperature (K)}
 
-\item{psi}{Soil water potential at saturation, MPa}
+\item{psi}{Soil water potential, MPa}
 
-\item{forc_exoenzyme}{forc_exoenzyme}
+\item{DOC}{Dissolved organic carbon pool}
 
-\item{clay}{clay}
+\item{ACTIVE}{Active soil organic carbon pool}
 
-\item{DOC}{DOC}
+\item{SLOW}{Slow soil organic carbon pool}
 
-\item{ACTIVE}{ACTIVE}
-
-\item{SLOW}{SLOW}
-
-\item{PASSIVE}{PASSIVE}
-
-\item{f_DOC_ATM}{f_DOC_ATM}
+\item{PASSIVE}{Passive soil organic carbon pool}
 
 \item{timestep}{Timestep (days)}
 }
@@ -32,8 +25,11 @@ decomp_century(forc_st, psi, forc_exoenzyme, clay, DOC, ACTIVE, SLOW,
 A list containing DOC, ACTIVE,
 SLOW, PASSIVE, f_ACTIVE_ATM, f_PASSIVE_ATM,
 f_SLOW_ATM, f_ACTIVE_DOC, f_ACTIVE_SLOW, f_SLOW_PASSIVE,
-f_ACTIVE_PASSIVE, f_PASSIVE_ACTIVE, and f_DOC_Leaching.
+f_ACTIVE_PASSIVE, f_PASSIVE_ACTIVE, f_DOC_Leaching, and f_DOC_ATM.
 }
 \description{
 Decomposition - CENTURY
+}
+\examples{
+decomp_century(forc_st = 15, psi = -0.5, DOC = 0.1, ACTIVE = 1, SLOW = 10, PASSIVE = 100, 1)
 }

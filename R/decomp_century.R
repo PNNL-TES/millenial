@@ -1,22 +1,21 @@
 #' Decomposition - CENTURY
 #'
 #' @param forc_st Soil temperature (K)
-#' @param psi Soil water potential at saturation, MPa
-#' @param DOC DOC
-#' @param ACTIVE ACTIVE
-#' @param SLOW SLOW
-#' @param PASSIVE PASSIVE
-#' @param f_DOC_ATM f_DOC_ATM
+#' @param psi Soil water potential, MPa
+#' @param DOC Dissolved organic carbon pool
+#' @param ACTIVE Active soil organic carbon pool
+#' @param SLOW Slow soil organic carbon pool
+#' @param PASSIVE Passive soil organic carbon pool
 #' @param timestep Timestep (days)
 #'
 #' @return A list containing DOC, ACTIVE,
 #' SLOW, PASSIVE, f_ACTIVE_ATM, f_PASSIVE_ATM,
 #' f_SLOW_ATM, f_ACTIVE_DOC, f_ACTIVE_SLOW, f_SLOW_PASSIVE,
-#' f_ACTIVE_PASSIVE, f_PASSIVE_ACTIVE, and f_DOC_Leaching.
+#' f_ACTIVE_PASSIVE, f_PASSIVE_ACTIVE, f_DOC_Leaching, and f_DOC_ATM.
 #' @export
-decomp_century <- function(forc_st, psi,
-                           DOC, ACTIVE, SLOW, PASSIVE,
-                           f_DOC_ATM, timestep) {
+#' @examples
+#' decomp_century(forc_st = 15, psi = -0.5, DOC = 0.1, ACTIVE = 1, SLOW = 10, PASSIVE = 100, 1)
+decomp_century <- function(forc_st, psi, DOC, ACTIVE, SLOW, PASSIVE, timestep) {
   # 873 !	decomposition subroutine CENTURY start
   # 874 !~ subroutine decomp_century(forc_st, psi, forc_npp, forc_roots, &
   # 875 		!~ forc_exoenzyme, clay, DOC, ACTIVE, SLOW, PASSIVE, f_DOC_ATM, f_ACTIVE_ATM,&
@@ -89,7 +88,6 @@ decomp_century <- function(forc_st, psi,
   # 936 	!~ maxpsi = -0.01
   maxpsi <- -0.01
   # 937 	!~ pH = 7.0
-  pH <- 7.0
   # 938 !~ !	psi = min(psi,maxpsi)
   # 939 !~ !	if (psi > minpsi) then
   # 940 !~ !	w_scalar = w_scalar + (log(minpsi/psi)/log(minpsi/maxpsi))
@@ -117,7 +115,7 @@ decomp_century <- function(forc_st, psi,
   # 955 	!~ if (DOC > 0._r8) then
   # 956         !~ f_DOC_leaching = DOC * 0.005 / dt * t_scalar * w_scalar
   # 957 	!~ end if
-  f_DOC_leaching <- DOC * 0.005 / dt * t_scalar * w_scalar
+  f_DOC_ATM <- DOC * 0.005 / dt * t_scalar * w_scalar
   # 958
   # 959 	!~ ! ACTIVE -> ATM
   # 960 	!~ if (ACTIVE > 0._r8) then
@@ -169,7 +167,7 @@ decomp_century <- function(forc_st, psi,
   # 998
   # Update state pools
   # 999 	!~ DOC = DOC + (f_ACTIVE_DOC - f_DOC_ATM - f_DOC_Leaching) * dt
-  DOC <- DOC + (f_ACTIVE_DOC - f_DOC_ATM - f_DOC_Leaching) * dt
+  DOC <- DOC + (f_ACTIVE_DOC - f_DOC_ATM - f_DOC_leaching) * dt
   # 1000 	!~ ACTIVE = ACTIVE + (f_PASSIVE_ACTIVE - f_ACTIVE_DOC - f_ACTIVE_SLOW - f_ACTIVE_PASSIVE - f_ACTIVE_ATM) * dt
   ACTIVE <- ACTIVE + (f_PASSIVE_ACTIVE - f_ACTIVE_DOC - f_ACTIVE_SLOW - f_ACTIVE_PASSIVE - f_ACTIVE_ATM) * dt
   # 1001 	!~ SLOW = SLOW + (f_ACTIVE_SLOW - f_SLOW_PASSIVE - f_SLOW_ATM) * dt
@@ -179,8 +177,10 @@ decomp_century <- function(forc_st, psi,
   # 1003
   # 1004 !~ end subroutine decomp_century
   # 1005 	!~ ! decomposition subroutine of CENTURY end
-  list(DOC, ACTIVE, SLOW, PASSIVE,
-       f_ACTIVE_ATM, f_PASSIVE_ATM, f_SLOW_ATM,
-       f_ACTIVE_DOC, f_ACTIVE_SLOW, f_SLOW_PASSIVE,
-       f_ACTIVE_PASSIVE, f_PASSIVE_ACTIVE, f_DOC_Leaching)
+  list(DOC = DOC, ACTIVE = ACTIVE, SLOW = SLOW, PASSIVE = PASSIVE,
+       f_ACTIVE_ATM = f_ACTIVE_ATM, f_PASSIVE_ATM = f_PASSIVE_ATM,
+       f_SLOW_ATM = f_SLOW_ATM, f_ACTIVE_DOC = f_ACTIVE_DOC,
+       f_ACTIVE_SLOW = f_ACTIVE_SLOW, f_SLOW_PASSIVE = f_SLOW_PASSIVE,
+       f_ACTIVE_PASSIVE = f_ACTIVE_PASSIVE, f_PASSIVE_ACTIVE = f_PASSIVE_ACTIVE,
+       f_DOC_leaching = f_DOC_leaching, f_DOC_ATM = f_DOC_ATM)
 }
