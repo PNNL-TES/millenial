@@ -224,11 +224,12 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 704 	Qmax = 10.0 ** (0.297 * log(clay * 100.0) + 2.355 + 0.50) !* 1.25  ! 1.35 is bulk density to convert Q from mg/kg to g/m2
 
   # Equation 11 in Abramoff et al. (2017)
-  # Qmax is the maximum sorption capacity (mg C kg-1 dry soil) and is converted to
+  # "Qmax is the maximum sorption capacity (mg C kg-1 dry soil) and is converted to
   # C density (g C m-2) by multiplying soil bulk density (BD = 1350 kg m-3), assuming
   # a 1 m soil profile. The parameters c1 and c2 are the coefficients for computing
-  # Qmax from the clay content in percent, derived from Mayes et al. (2012)
-  Qmax <- 10.0 ^ (0.297 * log(clay * 100.0) + 2.355 + 0.50) #* 1.25  # 1.35 is bulk density to convert Q from mg/kg to g/m2
+  # Qmax from the clay content in percent, derived from Mayes et al. (2012)."
+  # 2019-03-09 note: per Xiaofeng Xu, they ended up using 1.0 for bulk density
+  Qmax <- 10.0 ^ (0.297 * log(clay * 100.0) + 2.355 + 0.50) * 1.0
 
   # 705 !	write(*,*)"Qmax: ", Qmax
   # 706 	temp = (klmc_min * Qmax * LMWC ) / (2. + klmc_min * LMWC) - MINERAL
