@@ -5,7 +5,9 @@
 \title{Decomposition}
 \usage{
 decomp(forc_st, forc_sw, psi, forc_npp, forc_roots, forc_exoenzyme, clay,
-  LMWC, POM, MB, MINERAL, SOILAGG, globals)
+  LMWC, POM, MB, MINERAL, SOILAGG, klmc, kes, k_leaching, CUEref, CUET,
+  Taeref, Vpom_lmc, kpom, kmic, Vpom_agg, kpom_agg, AGGmax, Vmin_agg,
+  kmin_agg, kagg, M_Lmin, Vm_l, km_l)
 }
 \arguments{
 \item{forc_st}{Soil temperature (K)}
@@ -22,15 +24,15 @@ decomp(forc_st, forc_sw, psi, forc_npp, forc_roots, forc_exoenzyme, clay,
 
 \item{clay}{Clay (fraction)}
 
-\item{LMWC}{LMWC}
+\item{LMWC}{Low molecular weight C (i.e., root exudates and the by-products of exoenzyme activity)}
 
-\item{POM}{POM}
+\item{POM}{particulate organic matter (i.e., free fragments of plant detritus)}
 
-\item{MB}{MB}
+\item{MB}{Microbial biomass C}
 
-\item{MINERAL}{MINERAL}
+\item{MINERAL}{Mineral-associated organic matter}
 
-\item{SOILAGG}{SOILAGG}
+\item{SOILAGG}{Aggregate C}
 
 \item{globals}{List of global variables}
 }
