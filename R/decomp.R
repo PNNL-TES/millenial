@@ -183,6 +183,7 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 679 	!tfunc <- (teff[2] + (teff[3]/pi)* atan(pi*teff[4]*(soilTemp - teff[1]))) / (teff[2] + (teff[3]/pi)* atan(pi*teff[4]*(30 - teff[1])))
   # 680 	t_scalar = (11.75 + (29.7 / 3.1415926) * ATAN(real(3.1415926*0.031*(forc_st - 15.4)))) / &
   #   681 	(11.75 + (29.7 / 3.1415926) * ATAN(real(3.1415926 * 0.031 *(30.0 - 15.4))))
+
   # Equation 3 in Abramoff et al. (2017)
   t_scalar <- (11.75 + (29.7 / pi) * atan(pi * 0.031 * (forc_st - 15.4))) /
     (11.75 + (29.7 / pi) * atan(pi * 0.031 *(30.0 - 15.4)))
@@ -199,6 +200,7 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 690 	if (LMWC > 0._r8) then
   # 691         f_LM_leaching = LMWC * k_leaching * t_scalar !* w_scalar ! Xiaofeng removed water impact, after review at GBC June,2017
   # 692 	end if
+
   # LMWC -> out of sysem LWMMWC leaching
   # Equation 8 in Abramoff et al. (2017) except Xiaofeng removed water impact after review at GBC, June 2017
   f_LM_leaching <- LMWC * k_leaching * t_scalar #* w_scalar ! Xiaofeng removed water impact, after review at GBC June,2017
@@ -209,7 +211,8 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 697 	!~ else
   #   698 	!~ f_MI_LM_des = 0.
   # 699 	!~ end if
-  f_MI_LM_des <- 0
+
+
   if (MINERAL > M_Lmin) {
     f_MI_LM_des <- Vm_l * (MINERAL - M_Lmin) / (km_l + MINERAL - M_Lmin) * t_scalar * w_scalar
   } else {
@@ -278,8 +281,15 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 737 	if (POM > 0._r8) then
   # 738         f_PO_LM_dep = Vpom_lmc * POM / (POM + kpom) * t_scalar * w_scalar !* (1. - MB / (MB + k_POMes))
   # 739 	end if
+
   # POM -> LMWC
+  # "Decomposition of POM is governed by a double Michaelis–Menten equation,
+  # where Vpl is the maximum rate of POM decomposition, Kpl is the half-
+  # saturation constant, B is the microbial biomass carbon, and Kpe is the
+  # half-saturation constant of microbial control on POM mineralization.
+  # Equation 2 in Abramoff et al. (2017)
   f_PO_LM_dep <- Vpom_lmc * POM / (POM + kpom) * t_scalar * w_scalar #* (1. - MB / (MB + k_POMes))
+
   # 740
   # 741 	if(f_PO_LM_dep > (0.9 * POM)) then
   # 742 	f_PO_LM_dep = 0.9 * POM
@@ -325,7 +335,13 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 772 	if (POM > 0._r8) then
   # 773         f_PO_SO_agg = Vpom_agg * POM / (kpom_agg + POM) * (1. - SOILAGG / AGGmax) * t_scalar * w_scalar
   # 774 	end if
+
   # POM -> SOILAGG
+  # "The formation of aggregate C (A) from POM follows Michaelis–Menten dynamics,
+  # where Vpa is the maximum rate of aggregate formation, Kpa is the half-
+  # saturation constant of aggregate formation, and Amax is the maximum capacity
+  # of C in soil aggregates.
+  # Eauation 5 in Abramoff et al. (2017)
   f_PO_SO_agg <- Vpom_agg * POM / (kpom_agg + POM) * (1 - SOILAGG / AGGmax) * t_scalar * w_scalar
   # 775
   # 776 	if(f_PO_SO_agg > 0.9 * POM) then
@@ -354,9 +370,14 @@ decomp <- function(forc_st, forc_sw, psi, forc_npp, forc_roots,
   # 795 	f_SO_MI_break = f_SO_break * 1.5 / 3.
   # 796 	end if
   # SOILAGG -> MINERAL
+
+  # Soil aggregate C breakdown is partitioned to POM and MAOM,
+  # where kb is the rate of breakdown.
+  # Eauation 6 in Abramoff et al. (2017)
   f_SO_break <- SOILAGG * kagg * t_scalar * w_scalar
   f_SO_PO_break <- f_SO_break * 1.5 / 3
   f_SO_MI_break <- f_SO_break * 1.5 / 3
+
   # 797
   # 798 !	print *, "before update:", forc_npp, LMWC,POM,MB,MINERAL,SOILAGG,f_PO_LM_dep,f_MI_LM_des,f_LM_leaching,f_LM_MI_sor,f_LM_MB_uptake,&
   # 799 !	f_SO_PO_break,f_PO_LM_dep,f_PO_SO_agg
